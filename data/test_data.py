@@ -1,10 +1,15 @@
 import random
 import string
 import allure
+from data.server_responses import CourierResponses
 
 @allure.step("Генерация случайной строки длиной {length}")
 def generate_random_string(length=10):
     return ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
+
+@allure.step('Класс для доступа к текстам ответов сервера')
+class ServerResponses:
+    COURIER = CourierResponses
 
 @allure.feature("Тестовые данные")
 class CourierData:

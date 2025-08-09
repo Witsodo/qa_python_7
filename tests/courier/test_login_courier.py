@@ -1,6 +1,6 @@
 import pytest
 import allure
-from tests.test_data import CourierData
+from data.test_data import ServerResponses
 
 @allure.feature("API: Авторизация курьера")
 class TestLoginCourier:
@@ -27,21 +27,15 @@ class TestLoginCourier:
 
         with allure.step("Проверка ошибки"):
             assert response.status_code == 404
-            assert response.json()["message"] == "Учетная запись не найдена"
+            assert response.json()["message"] == ServerResponses.COURIER.ACCOUNT_NOT_FOUND
 
     @allure.title("Проверка валидации полей")
-    @pytest.mark.parametrize("login,password,expected_msg", [
-        ("", "valid_pass", "Недостаточно данных для входа"),     # Пустой логин
-        ("valid_login", "", "Недостаточно данных для входа"),    # Пустой пароль
-        ("", "", "Недостаточно данных для входа")               # Все поля пустые
+    @pytest.mark.parametrize("login,password", [
+        ("", "valid_pass"),
+        ("valid_login", ""),
+        ("", "")
     ])
-    def test_missing_or_empty_fields(self, courier_client, login, password, expected_msg):
-        with allure.step(f"Отправка запроса с login='{login}', password='{password}'"):
-            response = courier_client.login(
-                login=login,
-                password=password
-            )
-
-        with allure.step("Проверка ошибки"):
-            assert response.status_code == 400
-            assert response.json()["message"] == expected_msg
+    def test_missing_fields(self, courier_client, login, password):
+        response = courier_client.login(login, password)
+        assert response.status_code == 400
+        assert response.json()["message"] == ServerResponses.COURIER.NOT_ENOUGH_DATA_FOR_LOGIN
